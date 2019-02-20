@@ -23,13 +23,19 @@ class UserController extends Controller
     protected $userRepository;
 
     /**
+     * @var RoleRepository
+     */
+    protected $roleRepository;
+
+    /**
      * UserController constructor.
      *
      * @param UserRepository $userRepository
      */
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository, RoleRepository $roleRepository)
     {
         $this->userRepository = $userRepository;
+        $this->roleRepository = $roleRepository;
     }
 
     /**
@@ -39,6 +45,10 @@ class UserController extends Controller
      */
     public function index(ManageUserRequest $request)
     {
+        if (auth()->user()->isAdmin() !== true) {
+            throw new \Exception('You can not edit the administrator role.');
+        }
+
         return view('backend.auth.user.index')
             ->withUsers($this->userRepository->getActivePaginated(25, 'id', 'asc'));
     }
